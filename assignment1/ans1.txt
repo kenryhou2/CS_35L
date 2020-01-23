@@ -1,0 +1,148 @@
+Henry Kou
+204921239
+Assignment 1
+Lab section 8
+
+1.	man -k (searched command)
+
+2. 	Result: /usr/local/cs/bin/mv 
+	Result: /usr/bin/sh
+
+	Commands used:
+	which mv
+	which sh
+	
+3.	ar           (create, modify, and extract from archives)
+	pr           (convert text files for printing)
+	tr           (translate or delete characters)
+
+	Commands used:
+	man man
+	man apropos
+	man -k ^[a-z]r$
+	Also, find /usr/bin -executable -name [a-z]r works as well
+	man ar
+	man pr
+	man tr
+
+4.	/usr/bin/emacs-24.3
+
+	Commands used:
+	cd /usr/bin (path 1)
+	ls -l emacs
+	cd  /etc/alternatives (path 2)
+	ls -l emacs	
+	man readlink
+	readlink emacs
+	readlink -f emacs
+	I had to look under path1 and then path2 as path1 redirected me to path 2
+
+5.	Version number of /usr/bin/gcc : Red Hat 4.8.5-39
+   	Version number of plain gcc: 9.2.0
+
+	Commands used:
+	which gcc
+	/usr/local/cs/bin/gcc --version
+	gcc -v
+	/usr/bin/gcc --version
+
+   	The different version numbers signify different compilers, where the nonplain (4.8.5) version is an older compiler, and the plain 9.2.0 version of gcc
+	is the newer compiler program. This can be further denoted in their separate directory paths. There are two independent compilers which are different versions with respect to time possibly because there could
+	be newer programs being created that need to be compiled, and therefore new compilers need to be made to keep up. However, older programs might not
+	necessarily behave expectedly with the new compiler, and therefore the older nonplain gcc is kept for backwards compatibility. 
+
+6.	chmod u+sx means the permissions to execute and enable setuid permission for the owner of the file. 
+	chmod o-w means the permissions to write for the other users has been removed.
+
+	Commands used:
+	chmod u +sx hello.c
+	chmod o -w hello.c
+
+7.	Commands used: 
+	man find
+	cd ~
+	touch modded_dirs.txt
+	find /usr/local/cs -type d -newermt "2019-09-07" -not -newermt "2019-10-05" > ~/modded_dirs.txt
+	(looked into the max number of lines in the modded_dirs.txt)
+	(output first 5)
+	/usr/local/cs
+	/usr/local/cs/src/bison
+	/usr/local/cs/src/bison/RCS
+	/usr/local/cs/src/gnuplot
+	/usr/local/cs/src/gnuplot/RCS
+	...
+	total number of outputs: 175
+
+8.	280 Symbolic links in the same directory as find.
+	
+	Commands used: 
+	which find
+	man find
+	touch link_list.txt
+	cd /usr/bin/find
+	ls -l
+	find . -maxdepth 1 -type l > ~/link_list.txt
+	(navigated to link_list.txt and counted the max number of lines)
+	
+	
+9.	librom1394.so.0.3.0 was listed as the oldest file, however,libavc1394.so.0.3.0, libiec61883.so.0.1.1, and libraw1394.so.11.1.0
+	were also in the /usr/lib64 directory being modified on the same date: Dec 28, 2013. So, librom1394.so.0.3.0 was the oldest file
+	on the same day, but at an earlier/older time.
+
+	Commands Used:
+	cd /usr/lib64
+	ls -lt
+	
+10.	/usr/lib/locale (Usual default path for compiled individual locale data files.)
+	
+	Commands used: 
+	man locale
+	man localedef
+	
+11.	downcase-dwim
+	downcase-region
+	downcase-word
+	
+	Commands used:
+	emacs
+	C-h a downcase
+
+12.	C-M-r runs the command isearch-backward-regexp
+	C-M-v runs the command scroll-other-window
+	
+	Commands used:
+	emacs
+	C-h c C-M-r
+	C-h c C-M-v
+
+13.	C-g runs the command keyboard-quit
+	
+	Commands used: 
+	emacs
+	C-h c C-g
+
+14.	The yank function in emacs is the act of copying and pasting it. More specifically
+	it is the act of pasting the most recently killed text, and it is invoked with the command C-y.
+	
+	Commands Used:
+	C-h f yank
+	C-@ (mark)
+	M-w (copy)
+	C-y (yank)
+
+15.	The C-x d DIR_PATHd command has listed results for the current and parent directory.
+	dr-xr-xr-x.   2 root root       77824 Sep 23 13:15 .
+  	drwxr-xr-x.  15 root root        4096 May 22  2018 ..
+	Whereas the ls -l command in emacs does not have these two lines.
+	
+	In addition, there is a first line indicator saying total used in directory 326744 available 12473816
+	while the ls -l command says total 326660 as its first line.
+
+	Commands Used:
+	cd /usr/bin 
+	ls -l
+	emacs
+	C-x d /usr/bin
+	
+	
+		

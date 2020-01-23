@@ -1,0 +1,105 @@
+Henry Kou 204921239
+CS35L Assignment 2
+
+Lab:
+export LC_ALL='C'
+cd ~/CS35L/assignments/assignment2 (navigate to working directory)
+sort /usr/share/dict/words > words 
+wget https://web.cs.ucla.edu/classes/fall19/cs35L/assign/assign2.html
+cp assign2.html assign2.txt
+
+For the following transformations I used assign2.txt as an input and piped the file to a tr1.txt file.
+For example, in 1 below, I used the following keystrokes: cat assign2.txt | tr -c 'A-Za-z' '[\n*]' > tr1.txt
+1. tr -c 'A-Za-z' '[\n*]'							(This command takes each case nonsensitive non alphabetic letter and replaces it with a new line character)
+2. tr -cs 'A-Za-z' '[\n*]'							(This command replaces each case nonsensitive non alphabetic letter with a single occurrence of the new line character).
+3. tr -cs 'A-Za-z' '[\n*]' | sort						(This command performs everything that 2 does and then sorts the text file alphabetically through a pipe.)
+4. tr -cs 'A-Za-z' '[\n*]' | sort -u						(This command performs everything that 3 does and then sorts the text file alphabetically through a pipe with only one occurrance of each word.)
+5. tr -cs 'A-Za-z' '[\n*]' | sort -u | comm - words				(This command performs everything that 4 does and then compares the resulting standard input with the file words)
+6. tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -23 - words # ENGLISHCHECKER	(This command performs everything that 5 does then compares from the standard input to the file words and then shows the words unique to the standard input by suppressing columns 2 and 3.)
+
+I included the '#!/bin/sh' for the shell's interpreter to recognize that it is a bash script.
+To start parsing, I piped the input from the first operand using 
+1) 'cat $1 |'
+2) grep '<td>.*</td>' | #track lines with <td> and </td>
+3) sed 's/^\s*//g' | #get rid of spaces
+4) sed 's/<[^>]*>//g' | #rid non relevant html tags
+5) sed '/^$/d' | #rids blank lines
+6) sed -n '1~2!p' | #rids digits and english specific chars
+7) tr [:upper:] [:lower:] | #replaces uppercase with lowercase
+8) tr '`' "'" | #replace ` as '
+9) sed 's/, /\n/g' | #separate words with comma and space
+10) sed 's/ /\n/g' |
+11) sed "/[^pk'mnwlhaeiou]/d" | #remove non hawaiian
+12) sort -u | #sort words uniquely
+13) sed '/^$/d' #removes final spaces
+
+NOTE: to run the buildwords program: $cat [file which has hawaiian words to be parsed] | ./buildwords > hwords
+
+After making the buildwords program, I tested it by creating a sorted library of Hawaiian words called hwords and then
+using hwords to check the spelling of the assign2.html webpage.
+
+For reference, I used the ENGLISHCHECKER program on assign2.html and counted the number of words it thought was "mispelled"
+I used this command to do that: $cat assign2.html | tr -cs 'a-zA-z' '[\n*]' | sort -u | comm -23 - words | wc -l
+
+From this I obtained 94 misspelled words by ENGLISHCHECKER
+
+Then, I modified ENGLISHCHECKER to do HAWAIIANCHECKER which checks the spelling of Hawaiian rather than english
+with the assumption that hwords is a Hawaiian Dictionary.
+
+I checked assign2.html's misspelled words using HAWAIIANCHECKER and this command:
+$cat assign2.html | tr -cs 'A-Za-z' '[\n*]' | tr 'A-Z' 'a-z' | sort -u | comm -23 - hwords | wc -l
+
+From this I obtained 545 "misspelled words by HAWAIIANCHECKER
+
+
+Distinct misspelled words using ENGLISHCHECKER: 94 words
+
+Distinct misspelled words usingHAWAIIANCHECKER: 545 words
+
+I then redirected the previous two commands to respective misspelledenglish.txt and misspelledhawaiian.txt for comparison.
+Then, to see which words were mispelled in English but not in Hawaiian, I used
+the following command:
+comm -23 misspelledEnglish misspelledhawaiian
+Some examples: wiki and lau
+
+To see which words were mispelled in Hawaiian but not in English, I used the
+following command:
+comm -13 mispelledEnglish mispelledHawaiian
+Some examples: warning, worry
+
+ 
+Homework 2
+High Level Basic and Recursive poornames overview
+In depth line by line commenting is within the poornames shell script
+
+At the beginning of the script, I created some variables in order to hold my status for recursive mode.
+Next, I excplicitly checked for the recursive option "-r"
+If it was recursive I would set the recursive mode variable to true. 
+If not, the basic version of poornames ran.
+Based on if the mode was recursive or not, I would check the following operands.
+If there was 0 more operands, the passed in directory, D, will be "." or the current directory.
+If 1 more operand was passed in, the passed in directory was set to the first operand $1.
+If two or more operands are passed, the file would report an error on std err and exit.
+
+Next, I checked the validity of my path passed in. 
+If my operand was a path that was not a directory ie. is a symbolic link or a file or a single 
+"-", I would throw an stderr and exit.
+
+After these checks, I now know my path D, is a valid path to a directory.
+Based on the recursive mode, I would then perform a find at the provided valid directory.
+If the recursive mode was true, I would do a recursive find for files and directories and list them.
+If not recursive, I would just list all the files and directories within the provided path.
+I then extracted the basename from the filename components to the list I had found.
+And I would perform my syntax and duplicate checks. 
+Before I began my syntax checks I used the find command to find duplicates.
+Again, based on the status of recursive variable, I used a recursive or non recursive find.
+Then, I sorted my results and performed the non-case-sensitive uniq function to list all the duplicated
+files or directory names, and printed them out.
+
+After the duplicates were found, I again used the recursive/non-recursive find to a sort and uniq.
+This time, I was finding all the files and directories which are not duplicated, and I stored them in a variable called sorted_list.
+Then, I'd run the syntax checks specified in the spec to the unique items and append the basenames to the proper filename components
+and finally print them out.
+
+I had an issue in the recursive mode where the directory passed into the poornames file got listed as a poorname as well.
+Then, I solved the problem by explicitly checking for the passed operand and not printing the poorly named directory if there was a match.

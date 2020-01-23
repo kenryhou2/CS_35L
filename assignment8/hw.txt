@@ -1,0 +1,144 @@
+Henry Kou
+204921239
+CS35L Section 8
+Assignment 8
+
+Hw8
+
+Goals for Hw8:
+-Use GPG version 2. 
+-Export the public key, in ASCII format, into a file hw-pubkey.asc. 
+-Use this key to create a detached signature for your submission so that the commands described below can successfully verify it.
+
+Briefly answer the following questions.
+
+1. 
+Suppose the other teams really had been observing all the bytes going across the network in your lab exercise. 
+Is your resulting network still secure? If so, explain why, and explain whether your answer would change if 
+(1) you assumed the other teams had also tapped your keyboards after you completed all client-server setup and had thereby obtained your team's keystrokes during later operation, or 
+(2) you are booting off USB and you assume the other teams temporarily had physical control of the USB. 
+If not, explain any weaknesses of your team's setups, focusing on possible attacks by such outside observers.
+
+A: If the line between my network and my computer had been tapped where all the bytes being transferred were observed, the 
+resulting network is still secure. The nature of SSH uses encryption where niether party can fully decrypt and encrypt information.
+The whole reasoning of private and public keys utilizes this functionality.
+B: If my computer booted off of a USB and the specific USB I had used had been tampered by outside teams,
+the network can no longer be secure when my laptop communicates to the network beause there could be a function which
+outputs the private key in a way that other teams could possibly use to gain the ability to both encrypt and decrypt
+the passed messages.
+
+2.
+Explain why the gpg2 --verify command in the following instructions doesn't really verify that you personally created the file in question. 
+How would you go about fixing this problem?
+
+The gpg verify command only verifies the signature properly only if there is a trusted source from which we downloaded the detached key from.
+If the source is untrusted and has somehow manufactured a detached signature matching the file in question, the verification 
+process would be compromised.
+
+Finally, there would be a fix to this problem to use an additional verification process called checksum. 
+gpg also has the sha1sum command. The sha1sum checksum matches the checksum reported from several trusted sources.
+With this strategy, it makes it more difficult for an attacker to trick you into installing modified software
+ due to the number of crosschecks.
+
+Steps to generate key pair.
+
+gpg: keyring `/u/ee/ugrad/henryk/.gnupg/secring.gpg' created
+Please select what kind of key you want:
+   (1) RSA and RSA (default)
+   (2) DSA and Elgamal
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+Your selection? 1
+gpg: signal Interrupt caught ... exiting
+
+[henryk@lnxsrv06 ~/CS35L/assignments/assignment8]$ gpg2 --gen-key
+gpg (GnuPG) 2.0.22; Copyright (C) 2013 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Please select what kind of key you want:
+   (1) RSA and RSA (default)
+   (2) DSA and Elgamal
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+Your selection? 1
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (2048) 2048
+Requested keysize is 2048 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0) 0
+Key does not expire at all
+Is this correct? (y/N) y
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: hkou
+Name must be at least 5 characters long
+Real name: henryk
+Email address: hkou@g.ucla.edu
+Comment: GnuPG user ID for key
+You selected this USER-ID:
+    "henryk (GnuPG user ID for key) <hkou@g.ucla.edu>"
+
+Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
+You need a Passphrase to protect your secret key.
+
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+gpg: key 8EEF72B6 marked as ultimately trusted
+public and secret key created and signed.
+
+gpg: checking the trustdb
+gpg: 3 marginal(s) needed, 1 complete(s) needed, PGP trust model
+gpg: depth: 0  valid:   1  signed:   0  trust: 0-, 0q, 0n, 0m, 0f, 1u
+pub   2048R/8EEF72B6 2019-11-24
+      Key fingerprint = 0F73 FCAA 70EE C888 F082  D871 D24C ADDD 8EEF 72B6
+uid                  henryk (GnuPG user ID for key) <hkou@g.ucla.edu>
+sub   2048R/A8A07035 2019-11-24
+
+Exporting public key
+
+	$ gpg2 --list-keys
+
+/u/ee/ugrad/henryk/.gnupg/pubring.gpg
+-------------------------------------
+pub   2048R/8EEF72B6 2019-11-24
+uid                  henryk (GnuPG user ID for key) <hkou@g.ucla.edu>
+sub   2048R/A8A07035 2019-11-24
+
+Export public key in ascii format into file hw-pubkey.asc.
+	$gpg -armor --output hw-pubkey.asc --export 'henryk'
+Make a tarball of the above files + log.txt and zip it with gzip to produce hw.tar.gz
+$ tar –cf hw.tar <files>
+$ gzip hw.tar -> creates hw.tar.gz
+Use the private key you created to make a detached clear signature hw.tar.gz.sig for hw.tar.gz
+$ gpg --armor --output hw.tar.gz.sig --detach-sign hw.tar.gz 
+
+output
+You need a passphrase to unlock the secret key for
+user: "henryk (GnuPG user ID for key) <hkou@g.ucla.edu>"
+2048-bit RSA key, ID 8EEF72B6, created 2019-11-24
+
+To obtain eeprom from the beaglebone, use 
+	$ scp -r debian@192.168.7.2:/sys/bus/i2c/devices/0-0050/eeprom ~/desktop
+But that returned an error detailing permission denied.
+
+The fix was to change the permissions of the file by using:
+	$sudo chmod 777 eeprom //after navigating to the directory.
+Then, I was able to download it.
+
+Finally, I needed to generate a sig file from eeprom
+	$ gpg --clearsign eeprom
+	$ gpg --detach-sign eeprom
+

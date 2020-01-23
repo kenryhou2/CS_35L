@@ -1,0 +1,150 @@
+Henry Kou
+CS35L - Lab 8
+204921239
+
+Assignment 6
+
+Lab
+To compile: gcc simpgmp.c -lgmp -o simpgmp
+./simpgmp: usage: ./simpgmp exponent
+
+Find 2^24
+./simpgmp 24
+Output: 16777216
+
+Find 2^(2^24)
+./simpgmp 16777216
+
+Verify the output has 5,050,446 decimal digits, starts with "1818" and ends with "7536".
+Command: wc -c output.txt //where output.txt holds our output from ./simpgmp 16777216.
+result: 5050447
+explanation: This means there are 5050446 digits to the calculation after the subtractions of the EOF character.
+
+Command: head -c 4 output.txt
+result: 1818
+
+Command: tail -c -5 output.txt
+result: 7536
+
+ldd --version
+result: ldd (GNU libc) 2.17
+Copyright (C) 2012 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Written by Roland McGrath and Ulrich Drepper.
+
+command: ldd simpgmp
+results:
+        linux-vdso.so.1 =>  (0x00007ffed15de000)
+        libgmp.so.10 => /lib64/libgmp.so.10 (0x00007f252313a000)
+        libc.so.6 => /lib64/libc.so.6 (0x00007f2522d6c000)
+        /lib64/ld-linux-x86-64.so.2 (0x00007f25233b2000)
+
+Listing system calls:
+strace -c -o simp_strace ./simpgmp 16777216
+simp_strace output:
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 96.52    0.028473       14237         2           write
+  1.40    0.000412          27        15           munmap
+  1.23    0.000363           4       100           brk
+  0.26    0.000078           3        25           mmap
+  0.24    0.000072          72         1           execve
+  0.15    0.000043           7         6           mprotect
+  0.08    0.000024           8         3           open
+  0.03    0.000010           3         4           fstat
+  0.03    0.000009           5         2           read
+  0.02    0.000007           2         3           close
+  0.02    0.000007           7         1         1 access
+  0.01    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.029501                   163         1 total
+
+Of these system calls, the ones involved in dynamic linking are open, mmap, and close.
+This is because the library needs to be opened and mapped to memory.
+
+Command: ls /usr/bin | awk '(NR-204921239)%251 == 0'
+akregatorstorageexporter
+cupstestppd
+fonttosfnt
+gvfs-tree
+kincidenceeditor
+mf-nowin
+pack200
+php-cgi
+prtstat
+sexp-conv
+turbostat
+yuvtoppm
+
+Invoke ldd on each command in your list. If there are error messages, investigate why they're occurring.
+Get a sorted list of every dynamic library that is used by any of the commands on your list (omitting duplicates from your list).
+
+Procedure: For each command, invoke the whereis and run ldd on the program. Next, pipe the output of the ldd
+to a file. Finally cat all the files together and sort without duplicates.
+
+gvfs-tree is not a dynamic executable
+
+The following command sequence results in a sorted output of all the dynamic libraries.
+rid leading white space awk '{$1=$1;print}'
+gets rid of everything after space sed 's/\s.*$//'
+
+
+Hw 6
+
+Split randall file into 4 files.
+
+Static Linking
+compiling randcpuid.c: gcc -c randcpuid.c //for static link
+
+Creating object files:
+compiling randlibhw.c: gcc -w -fPIC -c randlibhw.c
+	got some warnings
+randlibhw.c:18:12: warning: implicit declaration of function '_rdrand64_step' [-Wimplicit-function-declaration]
+   18 |   while (! _rdrand64_step (&x))
+      |            ^~~~~~~~~~~~~~
+At top level:
+randlibhw.c:25:1: warning: 'hardware_rand64_fini' defined but not used [-Wunused-function]
+   25 | hardware_rand64_fini (void)
+      | ^~~~~~~~~~~~~~~~~~~~
+randlibhw.c:15:1: warning: 'hardware_rand64' defined but not used [-Wunused-function]
+   15 | hardware_rand64 (void)
+      | ^~~~~~~~~~~~~~~
+randlibhw.c:9:1: warning: 'hardware_rand64_init' defined but not used [-Wunused-function]
+    9 | hardware_rand64_init (void)
+      | ^~~~~~~~~~~~~~~~~~~~
+
+compiling randlibsw.c: gcc -w -fPIC -c randlibsw.c
+
+randlibsw.c: In function 'software_rand64_init':
+randlibsw.c:17:5: warning: implicit declaration of function 'abort' [-Wimplicit-function-declaration]
+   17 |     abort ();
+      |     ^~~~~
+randlibsw.c:17:5: warning: incompatible implicit declaration of built-in function 'abort'
+randlibsw.c:5:1: note: include '<stdlib.h>' or provide a declaration of 'abort'
+    4 | #include <stdbool.h>
+  +++ |+#include <stdlib.h>
+    5 |
+randlibsw.c: In function 'software_rand64':
+randlibsw.c:26:5: warning: incompatible implicit declaration of built-in function 'abort'
+   26 |     abort ();
+      |     ^~~~~
+randlibsw.c:26:5: note: include '<stdlib.h>' or provide a declaration of 'abort'
+At top level:
+randlibsw.c:22:1: warning: 'software_rand64' defined but not used [-Wunused-function]
+   22 | software_rand64 (void)
+      | ^~~~~~~~~~~~~~~
+
+Creating shared objects:
+gcc -shared -w -o randlibsw.so randlibsw.o
+gcc -shared -w -o randlibhw.so randlibhw.o
+
+make
+
+
+
+
+
+
+
+

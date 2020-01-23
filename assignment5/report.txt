@@ -1,0 +1,409 @@
+Henry Kou 
+204921239
+
+CS35L- Section 8 - Assignment 5
+Report.txt
+
+Lab 5
+This is a high level description of the code running a basic version of tr
+to compare io functions with system calls vs library calls.
+
+tr2b.c
+- My approach was to implement error checking with the operands and then to 
+implement the translation algorithm. 
+- The cases for error to check were number of operands,
+equal length of operands, and duplicate chars within the from operand.
+- Arguments input to the c program are stored in an array called argv, 
+with argument count, argc. It was interesting to note that argv[0] 
+was always the name of the c program, so inputting two operands like ./tr2b 'o' 'p'
+resulted in 3 operands passed into argv.
+-The length of each element within argv was determined with the strlen function.
+-Duplicate cases of chars was determined in O(n) time with an occupancy array.
+The indices of the array denoted every possible ascii value, 256, while the value
+of the array denoted an occupancy value of 0 (non occupied), or 1. I initialized
+the array as entirely unoccupied. Then, I iterated
+through every value of the from operand and marked the respective char's ascii values as
+occupied. If the process came across an element already occupied, that meant it had been
+encountered before, and was therefore a duplicate case.
+-All errors exited with an stderr message and exit status of 1.
+- After error checking I made an initial getchar stdin read to obtain the first char.
+- I then iterated in a for loop through every element of the from operand
+to see if a match occurred. Since the number of elements in the from operand and the to 
+operand were the same, I could use one iterator to keep track of my position in both arrays.
+If a match occurred, I would output the corresponding char from the to_operand array.
+Otherwise, I would just output the char from stdin. I would repeat this for the entire
+stdin statement until end of file occurred.    
+
+tr2u.c
+-The approach for the unbuffered version was largely similar with the overall structure.
+-I had to convert the syntax from the library calls into system calls with one byte buffers.
+The read input would use the file directory 0 to read from the stdin to a char buffer
+called inbuf. The write system call used file directory 1 to output to stdout, and 
+used a 1 byte buffer called outbuf. Both system calls returned with an integer indicating
+the status of the process, which I used a helper function, checkReadStatus, to diagnose
+if any errors occurred with the system calls.
+
+Comparison Data between Unbuffered (tr2u.c) and Buffered (tr2b.c)
+Approach: I used a separate big_file_generator.c file to loop 5 million times and write one char to std out.
+I then ran strace for each tr file for a terminal and file output.
+
+Strace to output file:
+Buffered
+Command: cat big_file_input.txt | strace -c -o tr2b_strace_1_to_file.txt ./tr2b 'abc' 'def' > bufOut.txt
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 49.84    0.000773           1      1223           read
+ 45.26    0.000702           1       611           write
+  1.74    0.000027           7         4           mprotect
+  1.35    0.000021           2         9           mmap
+  0.84    0.000013          13         1           munmap
+  0.71    0.000011           3         4           fstat
+  0.26    0.000004           4         1           arch_prctl
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.001551                  1860         1 total
+
+Unbuffered
+Command: cat bigfile_input.txt | strace -c -o tr2u_strace_1_to_file.txt ./tr2u 'abc' 'def' > unbufOut.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 55.49   24.818093           5   5000000           write
+ 44.51   19.907514           4   5000002           read
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         7           mmap
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   44.725607              10000024         1 total
+
+
+To terminal
+Strace buffered
+Command: cat big_file_input.txt | strace -c -o tr2b_strace_1.txt ./tr2b 'abc' 'def'
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 85.95    0.008489           2      4883           write
+ 12.09    0.001194           1      1223           read
+  0.52    0.000051           6         9           mmap
+  0.45    0.000044          44         1           execve
+  0.27    0.000027           7         4           mprotect
+  0.17    0.000017           9         2           open
+  0.14    0.000014           4         4           fstat
+  0.14    0.000014          14         1         1 access
+  0.11    0.000011          11         1           munmap
+  0.08    0.000008           8         1           brk
+  0.05    0.000005           3         2           close
+  0.03    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.009877                  6132         1 total
+
+Strace unbuffered
+Command: cat big_file_input.txt | strace -c -o tr2u_strace_1.txt ./tr2u 'abc' 'def'
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 56.57   26.776162           5   5000000           write
+ 43.43   20.556191           4   5000002           read
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         7           mmap
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   47.332353              10000024         1 total
+
+
+Time:
+Approach: I then compared the times for running the 5 million char file into each of the buffered and unbuffered programs.
+I did this for output to the terminal and to a file.
+
+One File to another
+Buffered
+time ./tr2b 'abc' 'def' < big_file_input.txt > bufCop.txt
+real    0m0.236s
+user    0m0.184s
+sys     0m0.010s
+
+Unbuffered
+time ./tr2u 'abc' 'def' < big_file_input.txt > bufCop.txt
+real    0m10.221s
+user    0m1.502s
+sys     0m8.672s
+
+To terminal: 
+buffered: time ./tr2b 'abc' 'def' < big_file_input.txt
+real    0m1.313s
+user    0m0.233s
+sys     0m0.036s
+
+unbuffered:  time ./tr2u 'abc' 'def' < big_file_input.txt
+real    0m12.028s
+user    0m1.530s
+sys     0m8.563s
+
+Analysis: Our buffered results were overwhelmingly more efficient in system calls which resulted in less time of execution.
+In the printing to output file case, the unbuffered timing took 8.672s to complete roughly 5 million read and 5 million write calls.
+Whereas the buffered case took 0.010s to perform 4884 read and 1223 write system calls. 
+
+
+Hw 5
+
+Requirements:
+Rewrite Sfrob to use system calls instead of getchar and putchar.
+Need both byte by byte realloc and entire file malloc
+Need an -f option.
+
+Low level understanding of the sfrobu program can be found in the comments of the sfrobu.c file.
+High level synopsis:
+Essentially I have a section devoted to performing sfrob with system calls line by line for a regular file.
+If there is no regular file passed in, the program defaults to byte by byte read and writes with system calls.
+If there is a regular file that grows, there would be a transition from the regular file processing to the byte by byte
+processing with system calls.
+
+Goals:
+Goal one make sfrob from hw 4 work with system calls.
+Goal two: add on detection for files vs piped inputs.
+Goal three: create sfrob for line by line with input files.
+Goal four: add -f functionality to frob with toUpper function.
+Goal five: add capability to act on growing files aka switch from file reading to byte by byte.
+
+ANALYSIS
+Times
+For Sfrobu Reading in a file (No Comparison)
+0 lines:
+real    0m0.002s
+user    0m0.000s
+sys     0m0.001s
+
+100 lines:
+real    0m0.005s
+user    0m0.002s
+sys     0m0.003s
+
+10,000 lines:
+real    0m0.617s
+user    0m0.044s
+sys     0m0.290s
+
+1,000,000 lines:
+real    0m34.274s
+user    0m4.936s
+sys     0m28.464s
+
+Comparison: (Since Sfrob has no capability to read in regular files)
+For sfrobu reading 	|For sfrob reading piped byte by byte
+piped byte by byte	|
+			|
+0 lines:		|0 lines:
+real    0m0.008s	|real    0m0.004s
+user    0m0.000s	|user    0m0.001s
+sys     0m0.003s	|sys     0m0.003s
+			|
+100 lines:		|100 lines:
+real    0m0.011s	|real    0m0.005s
+user    0m0.001s	|user    0m0.001s
+sys     0m0.008s	|sys     0m0.003s
+			|
+10,000 lines:		|10,000 lines
+			|
+real    0m0.523s	|real    0m0.094s
+user    0m0.086s	|user    0m0.025s
+sys     0m0.437s	|sys     0m0.026s
+			|
+1,000,000 lines:	|1,000,000 lines:
+real    0m52.191s	|real    0m14.427s
+user    0m8.679s	|user    0m2.614s
+sys     0m42.488s	|sys     0m2.322s
+
+CPU Time Cost as Function of Input Lines:
+Sfrob: y = 0.006e6E-06x, where x is the number of input lines, and y is CPU time cost (sys).
+Sfrobu:y = 0.0211e8E-06x, where x is the number of input lines, and y is CPU time cost (sys).
+Approach, after plotting num lines on the x axis and CPU Time Cost in the y axis for each program,
+I used a best fit curve where the trend was exponential to extract the line of best fit. 
+The equation is derived from the best fit line.
+
+Strace
+For sfrobu reading piped 
+0 lines: cat 0line.txt | strace -c -o sfrobu_strace_0line.txt ./sfrobu > unbufout.txt
+File Edit Options Buffers Tools Text Help
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+  0.00    0.000000           0         2           read
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         3           fstat
+  0.00    0.000000           0         7           mmap
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         4           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000000                    28         1 total
+
+
+100 lines: cat 100line.txt | strace -c -o sfrobu_strace_100line.txt ./sfrobu > unbufout.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 60.92    0.008402           3      2601           write
+ 37.72    0.005203           2      2603           read
+  0.49    0.000067          67         1           execve
+  0.34    0.000047           7         7           mmap
+  0.15    0.000020           5         4           mprotect
+  0.14    0.000019          10         2           open
+  0.08    0.000011          11         1         1 access
+  0.07    0.000009           9         1           munmap
+  0.04    0.000006           2         3           fstat
+  0.04    0.000005           1         4           brk
+  0.01    0.000002           1         2           close
+  0.01    0.000001           1         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.013792                  5230         1 total
+
+
+10,000 lines: cat tenthousandline.txt | strace -c -o sfrobu_strace_tenthrousand_line.txt ./sfrobu > unbufout.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 55.18    1.309962           5    259984           write
+ 44.79    1.063343           4    260004           read
+  0.02    0.000424          11        38           brk
+  0.00    0.000087          29         3           open
+  0.00    0.000068          17         4           fstat
+  0.00    0.000063          63         1           execve
+  0.00    0.000050           6         8           mmap
+  0.00    0.000028           7         4           mprotect
+  0.00    0.000021          11         2           munmap
+  0.00    0.000015           5         3           close
+  0.00    0.000008           8         1         1 access
+  0.00    0.000002           2         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    2.374071                520053         1 total
+
+1,000,000 lines: cat milliline.txt | strace -c -o sfrobu_strace_milli_line.txt ./sfrobu > unbufout.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 56.96  129.903397           5  25997364           write
+ 43.03   98.128792           4  26000004           read
+  0.01    0.013543           4      3122           brk
+  0.00    0.005359          11       476           mremap
+  0.00    0.000080           8        10           mmap
+  0.00    0.000032          11         3           open
+  0.00    0.000027           7         4           mprotect
+  0.00    0.000022           6         4           munmap
+  0.00    0.000016           4         4           fstat
+  0.00    0.000014           5         3           close
+  0.00    0.000010          10         1         1 access
+  0.00    0.000003           3         1           arch_prctl
+  0.00    0.000000           0         1           execve
+------ ----------- ----------- --------- --------- ----------------
+100.00  228.051295              52000997         1 total
+
+
+For sfrob reading piped
+0 lines: cat 0line.txt | strace -c -o sfrob_strace_0line.txt ./sfrob > unbufout.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 39.60    0.000040           5         8           mmap
+ 27.72    0.000028           7         4           mprotect
+ 11.88    0.000012          12         1           munmap
+  8.91    0.000009           2         4           brk
+  2.97    0.000003           2         2           read
+  2.97    0.000003           2         2           close
+  2.97    0.000003           1         3           fstat
+  2.97    0.000003           3         1           arch_prctl
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000101                    29         1 total
+
+100 lines: cat 100line.txt | strace -c -o sfrob_strace_100line.txt ./sfrob > unbufout.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 22.99    0.000020           5         4           mprotect
+ 16.09    0.000014           4         4           read
+ 13.79    0.000012          12         1           write
+ 13.79    0.000012          12         1           munmap
+ 12.64    0.000011           3         4           brk
+ 10.34    0.000009           2         4           fstat
+ 10.34    0.000009           1         9           mmap
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000087                    34         1 total
+
+
+10,000 lines: cat tenthousandline.txt | strace -c -o sfrob_strace_tenthousandline.txt ./sfrob > unbufout.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 70.75    0.000075           1        68           read
+ 29.25    0.000031           1        38           brk
+  0.00    0.000000           0        32           write
+  0.00    0.000000           0         3           open
+  0.00    0.000000           0         3           close
+  0.00    0.000000           0         5           fstat
+  0.00    0.000000           0        10           mmap
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         2           munmap
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000106                   168         1 total
+
+1,000,000 lines:cat milliline.txt | strace -c -o sfrob_strace_milliline.txt ./sfrob > unbufout.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 57.66    0.018732           6      3122           brk
+ 24.38    0.007922           2      3174           write
+ 15.32    0.004977           1      6352           read
+  1.99    0.000645           1       476           mremap
+  0.65    0.000210          53         4           munmap
+  0.00    0.000001           0         5           fstat
+  0.00    0.000001           0        12           mmap
+  0.00    0.000000           0         3           open
+  0.00    0.000000           0         3           close
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.032488                 13158         1 total
+
+If Sfrob was rewritten such that memory access also used system calls, the type of commands used and description would be the following:
+mmap() creates a new mapping in the virtual address space of the
+       calling process.  The starting address for the new mapping is
+       specified in addr.  The length argument specifies the length of the
+       mapping (which must be greater than 0).
+
+mremap() expands (or shrinks) an existing memory mapping, potentially
+       moving it at the same time (controlled by the flags argument and the
+       available virtual address space).
+
+The types of arguments used for mmap would be 
+void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
+
+The types of arguments used for mremap would be
+void *mremap(void *old_address, size_t old_size, size_t new_size, int flags, ... /* void *new_address */);
+
+
+

@@ -1,0 +1,118 @@
+Henry Kou
+204921239
+CS35L Section 8
+Assignment 9 - Git Spelunking
+
+Lab 8
+
+Consider the Git repository and working files in the directory ~eggert/src/gnu/emacs-CS-35L on the SEASnet GNU/Linux hosts. 
+For this repository, answer the following questions, using Git commands and/or scripts of your own devising. 
+For each question, record which commands you used; if you wrote and used a script, include a copy of the script.
+
+1. How much disk space is used to represent the working files in this directory? 
+	- Disk space for entire emacs-CS-35L directory: 519139808 bytes
+		- Command Used: $ du -bc
+	For disk space, I used the 'du' command, which allowed me to see the disk space used by the current directory
+	once I navigated into it. 
+
+How much is used to represent the Git repository? 
+	- Disk space in Git repo: 365350730
+	- The git repo includes everything that is within the .git subfolder.
+		- Command Used: $ du -bS
+	For this, I used the same command with a different option, '-S' to separate out the subfolder called
+	'.git'. I then read in bytes how large the '.git' subfolder was.
+	Just for comparision, the '.git' repo took up around 70% of the entire directory.
+
+What file or files consume most of the repository space and why?
+	- Top 5 files consuming most disk space in bytes from the directory.
+	311M    ./.git/objects/pack/pack-24e56b1749b9320c560213d9045fa6cee42b4174.pack
+	24M     ./.git/objects/pack/pack-24e56b1749b9320c560213d9045fa6cee42b4174.idx
+	7.8M    ./.git/objects/info/commit-graph
+	6.7M    ./.git/gitk.cache
+	6.6M    ./test/manual/BidiCharacterTest.txt
+	
+	Command Used: $ find -type f -exec du -bSh {} + | sort -rh | head -n 5
+
+- The files taking up the most space are stated as above. In particular the pack file is noticeably large.
+The initial format in which Git saves objects on disk is called a “loose” object format. However, occasionally
+Git packs up several of these objects into a single binary file called a “packfile” in order to save space and be more efficient.
+This results in a large, but could-be-larger file called the packfile. 
+- The next file is significantly smaller, but is also associated with the pack file. With an extension idx, this file keeps track
+of files within the pack file, so therefore if the packfile is large, the idx file is relatively large as well.
+- The commit graph file contains metadata about the commits made in the repo, so with a largely maintained repo such as this one,
+the commit metadata would be very large.
+- Cache files are usually large.
+- Text files are large if they have a large amount of text in them usually for documentation.
+
+2. How many branches are local to the repository? How many are remote?
+	- For local branches: 176
+	Commands used: $ git branch
+		       $ wc -l local_branches.txt
+	- For remote branches: 177
+	Commands used: $ git ls-remote --heads origin > remote_files.txt
+		       $ wc -l remote_files.txt
+	Verified with  $ git branch -r
+
+3. How many repositories are remote to this repository, and where are they?
+	-There is one remote repository that we pulled from.
+	origin  https://git.savannah.gnu.org/git/emacs.git (fetch)
+	origin  https://git.savannah.gnu.org/git/emacs.git (push)
+	
+	Command used: $ git remote -v show
+
+4. What are the ten local branches most recently committed to? List their names in order of commit date, most recent first.
+
+	2019-11-25 17:52:24 +0200 10 days ago   origin/master
+	2019-11-20 00:00:11 +0000 2 weeks ago   origin/scratch/joaot/make-completion-at-point-function
+	2019-11-18 21:59:44 +0000 2 weeks ago   origin/feature/windows-with-utils
+	2019-11-16 19:44:19 -0500 3 weeks ago   origin/scratch/completion-api
+	2019-11-10 23:01:46 +0000 3 weeks ago   origin/scratch/a-modest-completion-redesign-proposal
+	2019-11-05 18:04:20 +0000 4 weeks ago   origin/scratch/fido-mode
+	2019-11-03 16:37:02 +0800 5 weeks ago   origin/feature/gnus-select2
+	2019-10-14 14:18:42 +0200 7 weeks ago   origin/feature/extend_face_id
+
+	Bash Script Used:
+	for branch in `git branch -r | grep -v HEAD`;
+		do echo -e `git show --format="%ci %cr" $branch | head -n 1` \\t$branch; 
+	done | sort -r
+
+5. How many commits are in the master branch?
+	-Number of commits made in the master branch: 139583
+	Commands used: $ git rev-list --count master
+
+6. What percentage of the commits that are in any branch, are also in the master branch?
+	- Out of all the commits, ~ 97% were in the master branch.	
+	- This was derived from Num_master_commits/Totasl_num_commits. Denoted by 139583/143910.
+	-To find out commit count for all across all branches, I used the same command with different options.
+	Commands used: $ git rev-list --all --count
+
+7. Which ten people authored the most master-branch commits that were committed in the year 2013 or later, 
+and how many commits did each of them author during that period?
+	20575 Richard M. Stallman
+  	11834 Glenn Morris
+   	9837 Eli Zaretskii
+   	8397 Stefan Monnier
+   	6639 Kenichi Handa
+   	6144 Paul Eggert
+   	6012 Chong Yidong
+   	4803 Gerd Moellmann
+   	4516 Juanma Barranquero
+   	3767 Karl Heuer
+
+	Commands used: $ git log --pretty=format:%aN | sort | uniq -c | sort -nr
+	
+	Notes: 
+	- git log's pretty format outputs all commits by author name.
+	- uniq takes in a sorted input and counts up the repetitions of each name.
+	- final sort sorts in reverse and in numerical order.
+
+8. Use the gitk command to visualize the commit graph in this repository. 
+If you are SSHing into SEASnet, you’ll need to log in via ssh -X or (less securely) ssh -Y. 
+Draw a diagram relating the following commits to each other, and explain what likely happened to cause their commit-graph neighborhood. 
+You need not list every single intervening commit individually; you can simply use ellipses.
+
+c0 -> c1 ... -> c2 (branch-1)
+       \
+        c3 -> ... c4 (branch-2, branch-5)
+               \
+                c5 (branch-3)

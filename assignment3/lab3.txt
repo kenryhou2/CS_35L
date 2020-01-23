@@ -1,0 +1,148 @@
+Assignment 3
+Henry Kou
+204921239
+
+Lab 3
+1. Grab the Coreutils 8.29 source code compressed tarball and verify its signature with the 
+GNU keyring by running the shell command gpg --verify --keyring ./gnu-keyring.gpg coreutils-8.29.tar.xz.sig
+in your directory. Note any problems with this verification, and briefly explain why they happen.
+
+Overview of commands used:
+Downloaded coreutils-8.29 using wget
+Made verification with gpg shell command.
+
+Output from the Verification:  
+keyring.gpg coreutils-8.29.tar.xz.sig
+gpg: Signature made Wed 27 Dec 2017 10:29:05 AM PST using RSA key ID 306037D9
+gpg: /u/ee/ugrad/henryk/.gnupg/trustdb.gpg: trustdb created
+gpg: Good signature from "Pádraig Brady <P@draigBrady.com>"
+gpg:                 aka "Pádraig Brady <pbrady@redhat.com>"
+gpg:                 aka "Pádraig Brady <pixelbeat@gnu.org>"
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: 6C37 DC12 121A 5006 BC1D  B804 DF6F D971 3060 37D9
+
+Untar the downloaded package with tar –xJvf coreutils-8.29.tar.xz
+
+2.Compile and install your copy of Coreutils into a temporary directory of your own. Note any problems you run into.
+I made some directories to place a directory called coreutilsInstall/ where my coreutils will be installed.
+
+Compilation process breakdown:
+
+Configuration:
+I configured the source files using the ./configure command with a specific prefix option (--prefix=DIR)
+The directory I chose was the destination of the install make, which was coreutilsInstall.
+I used the following command after navigating to the respective directory: 
+pwd:/u/ee/ugrad/henryk/CS35L/assignments/assignment3/home/coreutilsInstall
+Then, I ran the configure command in the coreutils-8.29 folder with the prefix to the make install directory.
+$ ./configure --prefix=/u/ee/ugrad/henryk/CS35L/assignments/assignment3/home/coreutilsInstall
+
+Make:
+After the configuration, I ran the make command
+$make
+
+Make install:
+After the make, I ran the make install command
+$make install
+
+3: Reproducing the Bug:
+Reproduce the bug on your machine with the unmodified version of coreutils. 
+The test case that comes with the patch should give you ideas for how to reproduce the bug.
+
+After compilation, it was time to test the ls program and find the bug.
+From the coreutils-8.29 directory, I navigated to the src folder where I could run the ls command.
+I also created a test directory called testDir where I could run the ls command on. The testDir directory contained .foo and bar as well as . and ..
+
+To recreate the bug, I used the following commands:
+Testcase 1 (-a): $./ls -a ../../testDir/
+Outcome: .  ..  bar  .foo
+
+Testcase 2 (-A): $./ls -A ../../testDir/
+Outcome: bar  .foo
+
+Testcase 3 (-a -A): $./ls -a -A ../../testDir/
+Outcome: .  ..  bar  .foo
+
+Testcase 4 (-A -a): $./ls -A -a ../../testDir/
+Outcome: .  ..  bar  .foo
+
+So especially with cases 3 and 4, we can see the behavior of the bug appear. Note that the outcomes of each case 3 and 4 are the same even though
+the input option parameters were different. In case 3, the -A command was supposed to override the first parameter, -a and thus have the same output
+as case 2, however, we see that it didn't override the -a, and the "." and ".." directories were still printed out.
+We will solve this bug with a patch.
+
+To patch, I downloaded a patch file which I moved into the coreutils-8.29 folder.
+
+To apply the patch, I executed the command: $ patch -p1 < fixla.patch
+
+The output was as follows:
+patching file NEWS
+Hunk #1 FAILED at 4.
+1 out of 1 hunk FAILED -- saving rejects to file NEWS.rej
+patching file src/ls.c
+patching file tests/local.mk
+patching file tests/ls/a-option.sh
+
+After applying the patch and making the directory, I tested the same ls command with testDir's files.
+
+Testcase 1 (-a): $./ls -a ../../testDir/
+Outcome: .  ..  bar  .foo
+
+Testcase 2 (-A): $./ls -A ../../testDir/
+Outcome: bar  .foo
+
+Testcase 3 (-a -A): $./ls -a -A ../../testDir/
+Outcome: bar  .foo
+
+Testcase 4 (-A -a): $./ls -A -a ../../testDir/
+Outcome: .  ..  bar  .foo
+
+Note when making, I came across the error as follows:
+cd . && /bin/sh /u/ee/ugrad/irish/coreutils-8.29/build-aux/missing automake-1.15 --gnu Makefile
+
+/u/ee/ugrad/irish/coreutils-8.29/build-aux/missing: line 81: automake-1.15: command not found
+
+WARNING: 'automake-1.15' is missing on your system.
+
+         You should only need it if you modified 'Makefile.am' or
+
+         'configure.ac' or m4 files included by 'configure.ac'.
+
+         The 'automake' program is part of the GNU Automake package:
+
+         <http://www.gnu.org/software/automake>
+
+         It also requires GNU Autoconf, GNU m4 and Perl in order to run:
+
+         <http://www.gnu.org/software/autoconf>
+
+         <http://www.gnu.org/software/m4/>
+
+         <http://www.perl.org/>
+
+make: *** [Makefile:5997: Makefile.in] Error 127
+
+To solve this, I ran "autoreconf -fi" and then the make successfully executed.
+
+As we can see, the -A command now overrides the -a parameter, and now the command output is the same as 
+case 2. Likewise, for testcase 4, the -a, which is the later specified parameter overrides the -A to output
+"." and "..". Therefore, the patch was successful. I compared this command to the ls in the coreutilsInstall 
+directory in my home directory which did not have the patch applied to it. The two behaviors were different.
+
+Explanation of command usage:
+For compiling this coreutils directory, I used make because I wanted to compile the current directory rather
+than the remote copy of the directory I had installed to previously. The make install command would've installed my changes
+made in the coreutils-8.29 directory to the coreutilsInstall directory as well. Just for the purposes
+of this project, I wanted to keep a copy of the modified directory with the patch applied and a copy of a directory without the
+patch applied so I can observe the behavior of the correct and false ls commands.
+
+Q1. Does the patch improve the performance of ls or make it worse? Briefly explain.
+The patch improves the performance of ls because it makes it perform more robustly. The previous unpatched version could
+fulfill most of its features except for the case of ls -a -A, the -A would not override the -a parameter.
+
+Q2. If your company adopts this patched version of Coreutils instead of the default one, what else should you watch out for? 
+Might this new version of Coreutils introduce other problems with your application?
+If a company adopts a patched version of Coreutils, the ls that the company would be using would be a very specific form of ls.
+Therefore, if there is other code that relies on the unpatched version of Coreutils, the other software might not work
+because it is dependent on that -A not overriding -a feature or other reasons. 
+

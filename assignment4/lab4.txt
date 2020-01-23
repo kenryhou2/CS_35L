@@ -1,0 +1,145 @@
+Henry Kou
+204921239
+Assignment 4, Lab 4
+
+Wget the coreutils with bug tar file.
+
+Error while making the coreutils_with_bug:
+
+In file included from utimecmp.c:41:
+utimens.h:2:5: error: conflicting types for 'futimens'
+    2 | int futimens (int, char const *, struct timespec const [2]);
+      |     ^~~~~~~~
+In file included from utimecmp.h:25,
+                 from utimecmp.c:25:
+/usr/include/sys/stat.h:373:12: note: previous declaration of 'futimens' was here
+  373 | extern int futimens (int __fd, const struct timespec __times[2]) __THROW;
+
+To fix this bug, I downloaded a patch which I moved to the coreutils-with-bug directory.
+
+After renaming coreutils.diff to coreutils.patch,
+I applied the patch: $patch -p0 < coreutils.patch
+
+Patch output:
+patching file lib/utimens.c
+patching file lib/utimens.h
+patching file src/copy.c
+patching file src/tee.c
+patching file src/touch.c
+
+Made successfully because our patch file solved the error: conflicting types for 'futimens'.
+
+Reproducing the bug:
+
+$ tmp=$(mktemp -d)
+$ cd $tmp
+$ touch -d '1918-11-11 11:00 GMT' wwi-armistice-cs35L
+$ touch now
+$ sleep 1
+$ touch now1
+$ TZ=UTC0 ~/CS35L/assignments/assignment4/lab4/coreutils-with-bug/src/ls -lt --full-time wwi-armistice-cs35L now now1
+
+Output:
+-rw-r--r-- 1 henryk eeugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice-cs35L
+-rw-r--r-- 1 henryk eeugrad 0 2019-10-25 23:40:35.829594018 +0000 now1
+-rw-r--r-- 1 henryk eeugrad 0 2019-10-25 23:40:29.225370849 +0000 now
+
+The bug was reproduced because the wwi-armistice-cs35L file had the oldest date but was listed first.
+
+run -lt ../../test_dir/wwi-armistice-cs35L ../../test_dir/now ../../test_dir/now1
+
+Useful break points:
+break main at 1129
+end of main at 1353
+
+sort files called at 1259
+
+case 't' for sort time at 1583
+
+sort_files called again at 2366
+
+sort files function at 2953
+
+
+Order of Execution:
+Main, continue
+Breakpoint at sort_files: stack status
+sort_type passed in is 3 which is also the case for sort_time, set by the '-t' option
+within the sort_time switch, we also have another switch for cases of time_type.
+We have value of 0 which is time_mtime.
+Case statement sets funct which is a pointer to a function that takes two void pointers, set as V. where V is void *
+Boolean sort_reverse is false, and the address assigned to func is the address for compare_mtime
+The pointer to the function compare_mtime is then passed into qsort.
+Set another break at compare_mtime, continue.
+Once at compare_mtime, the stack is main, sort_files, qsort_r(), msort_with_tmp.part to compare_mtime.
+compare_mtime calls cmp_mtime and feeds two consts into it, a and b.
+break at cmp_mtime
+int diff = timespec_cmp(get_stat_mtime(&b->stat), get_stat_mtime(&a->stat));
+return diff ? diff : cmp (a->name, b->name);
+
+break at timespec_cmp
+/*Return negative, zero, positive if A<B, A==B, A>B respectively.*/
+timespec_cmp(struct timespec a, struct timespec b)
+{
+	int diff = a.tv_sec - b.tc_sec;
+	return diff ? diff: a.tv_nsec - b.tv_nsec;
+}
+
+With wwi-amistice-cs35L as first, comes out as a really negative number, -1109092356
+indicating an overflow with the subtraction.
+
+Within a copy of the timespec.h file, I added these edits.
+//int diff = a.tv_sec - b.tv_sec;
+  if(a.tv_sec > b.tv_sec)
+    return 1;
+  else if(a.tv_sec < b.tv_sec)
+    return -1;
+  else
+    return a.tv_nsec - b.tv_nsec;
+  //return diff ? diff : a.tv_nsec - b.tv_nsec;
+
+I then made a diff file with the original timespec.h and new and fixed timespec_fixed.h
+called lab4.diff
+
+I then applied the patch with: patch -p0 <lab4.diff from my coreutils directory.
+
+Then I used C-x 4 a command in emacs to find changelog, modified it and saved to
+coreutils-with-bug/lib/ChangeLog with these comments:
+2019-10-26  Henry Kou  <henryk@lnxsrv06.seas.ucla.edu>
+
+        * timespec.h: (timespec_cmp): Added a bug fix for integer overflow
+        for the subtraction of a.tv_sec and b.tv_sec. Replaced with comparison
+        operators between them and returning 1, -1, a.tv_nsec - b.tv_nsec if a.tv_sec
+        is greater than b.tv_sec, if a.tv_sec is less than b.tv_sec, and else cases
+        respectively.
+
+Then, I copied the changelog comment to the top of my lab4.diff.
+
+I recompiled the changes using the "make" command from my coreutils folder.
+
+Run the original commands again with the new patched ls to get
+
+-rw-r--r-- 1 henryk eeugrad 0 2019-10-27 01:10:04.551934242 +0000 now1
+-rw-r--r-- 1 henryk eeugrad 0 2019-10-27 01:09:55.381623396 +0000 now
+-rw-r--r-- 1 henryk eeugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice-cs35L
+
+When running the commands on the home directory of the seasnet servers, this is
+the output
+
+-rw-r--r-- 1 henryk eeugrad 0 Dec 17  2054 wwi-armistice
+-rw-r--r-- 1 henryk eeugrad 0 Oct 26 18:19 now1
+-rw-r--r-- 1 henryk eeugrad 0 Oct 26 18:19 now
+
+This is a drastic difference from the original date for wwi-armistice, 
+which was: ‘1918-11-11 11:00 GMT’. So obviously another similar issue with the
+current ls commands exist with the seasnet servers as well.
+According to my TA's slides, 
+Timestamps represented as seconds since Unix Epoch
+- SEASnet NFS filesystem has unsigned 32-bit time stamps
+- Local File System on Linux server has signed 32-bit time stamps
+- If you touch the files on the NFS filesystem it will return timestamp around 2054
+- => files have to be touched on local filesystem (df –l)
+
+
+
+

@@ -1,0 +1,178 @@
+Henry Kou
+204921239
+CS35L - Section 8
+Hw 7
+PARTNER FOR PATCHING: Alvin Nguyen, StuID 705124129
+
+2. Check out version 3.0 of a clean Diffutils from your repository, into a new branch named “quote”.
+$git checkout v3.0 -b quote
+
+3. Install change into the new branch by running patch with quote-3.0-patch.txt as input.  \
+$patch -p1 < ../../lab7_temp2/quote-3.0-patch.txt
+
+patching file src/cmp.c
+patching file src/diff.c
+patching file src/diff3.c
+patching file src/dir.c
+patching file src/sdiff.c
+patching file src/side.c
+patching file src/util.c
+
+4. Learn how to use the Emacs function add-change-log-entry-other-window (C-x 4 a).
+Add-change-log-entry: Adds a new entry to the change log file for the file you are editing.
+C-x 4 a visits the change log file and creates a new entry unless the most recent entry is for today's date and your name. 
+
+5. 
+Compose an appropriate ChangeLog entry for your patch, by adapting the change log from the original patch.
+(C-x 4 a).
+
+Message input:  GNU Diffutils, regularly uses “`” as a quoting \
+character in diagnostics. For example, the command “diff . -” outputs the diagn\
+ostic “diff: cannot compare `-' to a directory”, and this misuse of “`” violate\
+s your customer’s requirements. This patch outputs “diff: cannot compare '-' to\
+ a directory” instead, using an apostrophe (U+0027) for both opening and closin\
+g quote.Note that these changes are only applied to character string constants \
+in .c files.
+
+Notice there is now a Changelog entry with the following paragraph.
+
+6. Commit changes to new branch with Changelog entry as the commit message.
+$git add .
+$git status
+On branch quote
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        modified:   src/cmp.c
+        modified:   src/diff.c
+        modified:   src/diff3.c
+        modified:   src/dir.c
+        modified:   src/sdiff.c
+        modified:   src/side.c
+        modified:   src/util.c
+$git commit -F <File> where <File> is Changelog
+$git commit -F <ChangeLog>
+Output:
+[quote 563ac47] 2019-11-19  Henry Kou  <henryk@lnxsrv06.seas.ucla.edu>
+ Committer: Henry Kou <henryk@lnxsrv06.seas.ucla.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 7 files changed, 54 insertions(+), 48 deletions(-)
+7. Use the command “git format-patch” to generate a file formatted-patch.txt. 
+This patch should work without having to fix things by hand afterwards.
+
+$git format-patch -1 --stdout > ../formatted-patch.txt
+
+8. I exchanged my patch file with my partner, Alvin, and I implemented his patch with the 
+command:
+	$git am 
+
+git am takes a mailbox of commits formatted as an email messages 
+(e.g. the output of git format-patch) and applies them to the current branch.
+
+I also switched to a new branch of the version 3.0 of diffutils and named it partner.
+	$git checkout v3.0 -b partner
+
+	$git am ../formatted-patch-alvin.txt
+output:
+Applying: quote 'like this' or "like this", not `like this'
+
+Now I'll build diffutils after the patch has been implemented with the same procedure denoted
+in the README-hacking
+	$ ./bootstrap
+	$patch -p0 gnulib.patch //this is the patch to fix "gets"
+	$ ./configure
+	$ make
+	$ make check
+Finally, verified with "diff . -" and "diff --help". 
+output of "diff . -"
+ $diff: cannot compare '-' to a directory
+
+I verified the output of make check with the output of make check from the lab portion.
+And besides the files being in different directories, there were no other differences. 
+Therefore the make check of my partners' patch file built in the same way as the lab.
+
+$make check > makeCheckout.txt //within the lab directory diffutils.
+$cd ../hw7/diffutils
+$make check > makeCheckout_Alvin.txt //within the hw directory diffutils
+$diff -u ../../lab7/makeCheckout.txt makeCheckout_Alvin.txt > makeCheck.diff
+
+Output from make check resulted in these errors which were deemed fine in the piazza.
+/bin/sh: /bin/sh: cannot execute binary file
+make[3]: *** [Makefile:1309: basic.log] Error 126
+make[3]: Leaving directory '/w/home.20/ee/ugrad/henryk/CS35L/assignments/assignment7/hw7/diffutils/tests'
+make[2]: *** [Makefile:1291: check-TESTS] Error 2
+make[2]: Leaving directory '/w/home.20/ee/ugrad/henryk/CS35L/assignments/assignment7/hw7/diffutils/tests'
+make[1]: *** [Makefile:1406: check-am] Error 2
+make[1]: Leaving directory '/w/home.20/ee/ugrad/henryk/CS35L/assignments/assignment7/hw7/diffutils/tests'
+make: *** [Makefile:1017: check-recursive] Error 1
+
+Upon examination of makeCheck.diff, no significant differences were found in the comparison.
+
+9. Verify the ChangeLog entry works by running
+$make distdir
+Next, inspect the resulting diffutils*/ChangeLog file. 
+A new directory diffutils-3.0.1-2e78 was created. 
+Examining my partner's Changelog,
+
+2019-11-19  Alvin Phu Nguyen  <phu@lnxsrv05.seas.ucla.edu>
+
+        quote 'like this' or "like this", not `like this'
+
+His commit message for the patch was displayed.
+
+10. Running gitk on the copy of GNU Emacs git repo on directory ~eggert/src/gnu/emacs.
+I first exited putty and then logged back in with X11 enabled from the putty window.
+
+	$cd ~eggert/src/gnu/emacs
+	$gitk
+On initial run,
+output: 
+PuTTY X11 proxy: unable to connect to forwarded X server: Network error: Connection refused
+Application initialization failed: couldn't connect to display "localhost:11.0"
+PuTTY X11 proxy: unable to connect to forwarded X server: Network error: Connection refused
+Error in startup script: couldn't connect to display "localhost:11.0"
+    while executing
+"load /usr/lib64/tk8.5/../libtk8.5.so Tk"
+    ("package ifneeded Tk 8.5.13" script)
+    invoked from within
+"package require Tk"
+    (file "/usr/local/cs/bin/gitk" line 10)
+
+Solution: Needed to run Xming, and then ran gitk again.
+A GUI window popped up for emacs.
+find the newest merge that is not newer than 2015-01-25. Briefly describe (in hw9.txt)
+your view of the mergepoint, along with the roles of subwindows that you see.
+
+The mergepoint was made on 2015-01-20 at 22:05:31. byt Paul Eggert
+The Parent of the node was a commit: backport from trunk of bug 19531
+The child was a commit prevent artist-mode from creating runaway timers.
+The node itself was a backport: correct old fix for GTK font selection.
+
+The follwing change was made: 
+index 5c9ff9ca68..b23d84c8b8 100644
+@@ -2103,7 +2103,7 @@ xg_get_font (struct frame *f, const char *default_name)
+ 	  args[8] = QCtype;
+ 	  args[9] = Qxft;
+ 
+-	  font = Ffont_spec (8, args);
++	  font = Ffont_spec (10, args);
+ 
+ 	  pango_font_description_free (desc);
+ 	  dupstring (&x_last_font_name, name);
+
+Description of the subwindows:
+On the top left, we can see a commit node graph with all the branches and commit nodes
+and messages over time. On the next window to the right, there is a list of the specific contirbutors for each node.
+On the far right, there is a list of the dates and times which the commit was made. On the bottom window,
+there is a commit search toolbar as well as a diff display for the corresponding commit selected. 

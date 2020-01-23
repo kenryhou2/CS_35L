@@ -1,0 +1,229 @@
+Henry Kou
+204921239
+CS35L - Section 8
+Lab 8 Beaglebone!
+PARTNER: Alvin Nguyen, StuID 705124129
+
+1.) Connected BeagleBone to the computer using USB Cable.
+
+2.) Found BEAGLEBONE as an external storage device and open it.
+
+3.) Double clicked on "Start.htm" Which brought me to a website with details on setting up the BeagleBone.@5.) 
+	$ sudo ssh debian@192.168.7.2
+	output:
+	The authenticity of host '192.168.7.2 (192.168.7.2)' can't be established.
+	ECDSA key fingerprint is SHA256:9QrTyY7Y6Rf6EPN2Vp5yS9KP+zaKh3UFVtr+l9oNJxQ.
+	Are you sure you want to continue connecting (yes/no)? yes
+	Warning: Permanently added '192.168.7.2' (ECDSA) to the list of known hosts.
+
+	Prompted for password: temppwd
+	Once I logged in, I was now operating as debian@beaglebone.
+
+6.) Connecting BeagleBone to wifi using the tool connmanctl.
+	a.) $ connmanctl
+
+Enter file in which to save the key (/home/debian/.ssh/id_rsa): 
+/home/debian/.ssh/id_rsa already exists.
+Overwrite (y/n)? 
+debian@beaglebone:~$ ssh-copy-id -i debian@192.168.7.2
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/debian/.ssh/id_rsa.pub"
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+debian@192.168.7.2's password: 
+
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh 'debian@192.168.7.2'"
+and check to make sure that only the key(s) you wanted were added.
+
+	Output: Error getting VPN connections: The name net.connman.vpn was not provided by any .service filconnmanctl> 
+	Apparently any vpn error is fine according to Piazza Beaglebone setup.
+	b.) Turn on wifi for Beaglebone.
+	
+	connmandctl> enable wifi
+	
+	Output:
+	Error wifi: Already enabled
+	
+	c.) Scan all available wifi points
+	connmanctl> scan wifi
+	d.) List all discovered access points:
+	connmanctl> services
+
+	Output:
+    *AR CR3760-wifi    	 wifi_587a622c1473_4352333736302d77696669_managed_psk
+*A  UCLA_WEB             wifi_587a622c1473_55434c415f574542_managed_none
+    BeagleBone-ADC0      wifi_587a622c1473_426561676c65426f6e652d41444330_managed_psk
+    BeagleBone100101     wifi_587a622c1473_426561676c65426f6e65313030313031_managed_none
+    BeagleBone-1A5E      wifi_587a622c1473_426561676c65426f6e652d31413545_managed_psk
+    BeagleBone010161     wifi_587a622c1473_426561676c65426f6e65303130313631_managed_none
+    BeagleBone010675     wifi_587a622c1473_426561676c65426f6e65303130363735_managed_none
+    BeagleBone-13B7      wifi_587a622c1473_426561676c65426f6e652d31334237_managed_psk
+    BeagleBone010134     wifi_587a622c1473_426561676c65426f6e65303130313334_managed_none
+    BeagleBone010627     wifi_587a622c1473_426561676c65426f6e65303130363237_managed_none
+    BeagleBone100193     wifi_587a622c1473_426561676c65426f6e65313030313933_managed_none
+    BeagleBone010413     wifi_587a622c1473_426561676c65426f6e65303130343133_managed_none
+    BeagleBone010163     wifi_587a622c1473_426561676c65426f6e65303130313633_managed_none
+    BeagleBone031407     wifi_587a622c1473_426561676c65426f6e65303331343037_managed_none
+    BeagleBone031190     wifi_587a622c1473_426561676c65426f6e65303331313930_managed_none
+    BeagleBone-40B6      wifi_587a622c1473_426561676c65426f6e652d34304236_managed_psk
+    UCLA_WIFI            wifi_587a622c1473_55434c415f57494649_managed_none
+    joshualiu97          wifi_587a622c1473_6a6f736875616c69753937_managed_psk
+    eduroam              wifi_587a622c1473_656475726f616d_managed_ieee8021x
+    Rice Room's Guest Network wifi_587a622c1473_5269636520526f6f6d2773204775657374204e6574776f726b_managed_psk
+    
+	e.) Access point to connect to looks like CR3760-wifi wifi_506583d4fc5e_544e434150413937414239_managed_psk.
+
+	f.) Register as prospective client:
+	connmanctl> agent on
+	
+	Output:
+	Agent registered.
+	
+	g.) After locating access point, use string next to the name of access point as input to following command. wifi_587a622c1473_6950686f6e65_managed_psk.
+	After typing in the Passphrase, I am connected to the wifi, so disconnect from application connmenctl, using quit.
+
+	connmanctl> connect wifi_587a622c1473_4352333736302d77696669_managed_psk
+	Passphrase? 3760ClassNet
+
+8.) Find IP Address of BeagleBone by running ifconfig, and checking the network interface, wlan0.
+	$ifconfig
+	
+	Output:
+SoftAp0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.8.1  netmask 255.255.255.0  broadcast 192.168.8.255
+        inet6 fe80::9270:65ff:fed7:58bf  prefixlen 64  scopeid 0x20<link>
+        ether 90:70:65:d7:58:bf  txqueuelen 1000  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 38  bytes 7069 (6.9 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 491  bytes 54188 (52.9 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 491  bytes 54188 (52.9 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+usb0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.7.2  netmask 255.255.255.252  broadcast 192.168.7.3
+        inet6 fe80::9270:65ff:fed7:58c1  prefixlen 64  scopeid 0x20<link>
+        ether 90:70:65:d7:58:c1  txqueuelen 1000  (Ethernet)
+        RX packets 1040  bytes 104512 (102.0 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 552  bytes 98279 (95.9 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+usb1: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.6.2  netmask 255.255.255.252  broadcast 192.168.6.3
+        inet6 fe80::9270:65ff:fed7:58c4  prefixlen 64  scopeid 0x20<link>
+        ether 90:70:65:d7:58:c4  txqueuelen 1000  (Ethernet)
+        RX packets 433  bytes 57692 (56.3 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 190  bytes 30540 (29.8 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+wlan0: flags=-28605<UP,BROADCAST,RUNNING,MULTICAST,DYNAMIC>  mtu 1500
+        inet 172.31.44.245  netmask 255.255.252.0  broadcast 172.31.47.255
+        inet6 fe80::5a7a:62ff:fe2c:1473  prefixlen 64  scopeid 0x20<link>
+        ether 58:7a:62:2c:14:73  txqueuelen 1000  (Ethernet)
+        RX packets 109  bytes 19883 (19.4 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 249  bytes 32363 (31.6 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+My partner's IP address was given to me when he used the ifconfig command.
+Under his wlan0's inet, the ip address was 172.30.7.107. I could now SSH into his beaglebone.
+
+9.) After gaining internet, update database of apt-get.
+On debian,
+	$ sudo apt-get install xauth.
+	$ sudo apt-get install xvfb.
+
+10.) To verify that X11 is enabled, check for server and client the check/etc/ssh/ssh_config and /etc/ssh/sshd_config.
+
+	$ emacs /etc/ssh/ssh_config
+	
+	My X11Forwarding was set to yes
+
+11.) 
+
+Lab 8
+	$ dpkg --get-selections | grep openssh
+	openssh-client					install
+	openssh-server					install
+	openssh-sftp-server				install
+
+	$ Sudo apt-get install openssh-server
+	$ Sudo apt-get install openssh-client
+
+Chose to be client, client steps:
+
+Given my parter's IP address from his ifconfig steps, I could SSH into his Beaglebone.
+
+1.) Generate public and private keys
+
+	$ ssh-keygen
+
+Output:
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/debian/.ssh/id_rsa): 
+/home/debian/.ssh/id_rsa already exists.
+Overwrite (y/n)? y
+Your identification has been saved in /home/debian/.ssh/id_rsa.
+Your public key has been saved in /home/debian/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:i42YTgaPZKP8alM3t+jaKBGyTKSuvxGg/c90A7+CBMc debian@beaglebone
+The key's randomart image is:
++---[RSA 2048]----+
+|                 |
+| .               |
+|+  .             |
+|+=. E            |
+|*.Oo  . S        |
+|oB O.= B .       |
+|o.=.O.B B        |
+|.+.=+=.o o       |
+|.o*=+oo..        |
++----[SHA256]-----+
+
+2.) Copy your public key to the server for key-based authentication
+	$ ssh-copy-id -i henry@172.20.10.1
+
+Output:
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/debian/.ssh/id_rsa.pub"
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+	
+	$ henry@172.20.10.1's password: temppwd
+
+Output:
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh 'henry@172.20.10.1'"
+and check to make sure that only the key(s) you wanted were added.
+
+3.) Add private key to authentication agent (ssh-agent)
+	$ ssh-add
+Error:
+	Could not open a connection to your authenticatiion agent
+	
+	$ eval `ssh-agent`
+	$ ssh-add
+Output:
+Enter passphrase for /home/debian/.ssh/id_rsa: 
+Identity added: /home/debian/.ssh/id_rsa (/home/debian/.ssh/id_rsa)
+
+Now I can successfully ssh into my partner's beaglebone without inputting a password everytime.
+
+4.) SSH to server
+	$ ssh -X henry@172.20.10.12
+I am now logged into my partner's beaglebone.
+
+5.) Run a command on remote host.
+I run XMing and type in the following command:
+	$ xeyes
+The xeyes program runs with the eyes following the mouse on my partner's beaglebone.

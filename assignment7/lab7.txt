@@ -1,0 +1,368 @@
+Assignment 7
+Henry Kou
+204921239
+CS35L Lab-8
+
+Lab 7
+
+To obtain the git repo,
+1. git clone https://git.savannah.gnu.org/git/diffutils.git
+
+List the log changes in output text file, navigate to within the diffutils directory and execute:
+2. git log > git-log.txt
+
+List tags used
+3. command: git tag > git-tag.txt
+
+To find the commit with the message "maint: quote 'like this' or "like this", not `like this'"
+4. I used the command: git log --all --grep='maint: quote'
+Note the hash code unique to the commit: commit 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f
+Then, generate a patch command like this
+git show 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f > ../quote-patch.txt
+
+5. To navigate to the diffutils v3.0, I used the command:
+git checkout v3.0 -b diff_utils_3.0
+
+6. Using the quote-patch file, I applied the patch to the v3.0 version.
+Several times, the patch did not know which file to apply on, so using the RETURN key, I skipped past.
+command: patch -p1 < ../quote_patch.txt
+
+Output:
+can't find file to patch at input line 35
+Perhaps you used thgit ste wrong -p or --strip option?
+The text leading up to this was:
+--------------------------
+|commit 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f
+|Author: Paul Eggert <eggert@cs.ucla.edu>
+|Date:   Wed Jan 25 23:46:16 2012 -0800
+|
+|    maint: quote 'like this' or "like this", not `like this'
+|
+|    This is in response to a recent change in the GNU coding standards,
+|    which now suggest quoting 'like this' or "like this", instead of
+|    `like this' or ``like this''.
+|    * HACKING, NEWS, README, README-hacking, TODO, doc/diagmeet.note:
+|    * doc/diffutils.texi, ms/config.bat, ms/config.site:
+|    * src/analyze.c, src/cmp.c, src/context.c, src/diff.c:
+|    * src/diff.h, src/diff3.c, src/dir.c, src/ifdef.c, src/io.c:
+|    * src/sdiff.c, src/side.c, src/system.h, src/util.c:
+|    * tests/help-version:
+|    Quote 'like this' or "like this" in commentary.
+|    * cfg.mk (old_NEWS_hash): Adjust to reflect new NEWS quoting.
+|    * man/help2man: Update to 1.40.4 version, with quoting fixed as above.
+|    * po/en.po: Remove translation involving `, as it's no longer needed.
+|    * src/cmp.c (try_help, specify_ignore_initial, usage, main):
+|    * src/diff.c (main, try_help, option_help_msgid, specify_value)
+|    (compare_files):
+|    * src/diff3.c (main, try_help, option_help_msgid, usage)
+|    (read_diff):
+|    * src/dir.c (compare_names):
+|    * src/sdiff.c (try_help, usage, check_child_status, main):
+|    * src/util.c (finish_output):
+|    * tests/help-version:
+|    Quote 'like this' in output.
+|
+|diff --git a/HACKING b/HACKING
+|index 3a99833..522e0b5 100644
+|--- a/HACKING
+|+++ b/HACKING
+--------------------------
+File to patch:
+Skip this patch? [y]
+Skipping patch.
+1 out of 1 hunk ignored
+patching file NEWS
+Hunk #1 succeeded at 30 (offset -28 lines).
+Hunk #2 succeeded at 66 (offset -28 lines).
+Hunk #3 succeeded at 106 (offset -28 lines).
+Hunk #4 succeeded at 140 (offset -28 lines).
+Hunk #5 succeeded at 184 (offset -28 lines).
+Hunk #6 succeeded at 197 (offset -28 lines).
+Hunk #7 succeeded at 209 (offset -28 lines).
+Hunk #8 succeeded at 221 (offset -28 lines).
+patching file README
+Hunk #1 FAILED at 9.
+Hunk #3 FAILED at 60.
+2 out of 3 hunks FAILED -- saving rejects to file README.rej
+patching file README-hacking
+Hunk #1 FAILED at 19.
+1 out of 1 hunk FAILED -- saving rejects to file README-hacking.rej
+patching file TODO
+patching file cfg.mk
+Hunk #1 FAILED at 29.
+1 out of 1 hunk FAILED -- saving rejects to file cfg.mk.rej
+patching file doc/diagmeet.note
+can't find file to patch at input line 222
+Perhaps you used the wrong -p or --strip option?
+The text leading up to this was:
+--------------------------
+|diff --git a/doc/diffutils.texi b/doc/diffutils.texi
+|index 58b140c..00403df 100644
+|--- a/doc/diffutils.texi
+|+++ b/doc/diffutils.texi
+--------------------------
+File to patch:
+Skip this patch? [y]
+Skipping patch.
+1 out of 1 hunk ignored
+can't find file to patch at input line 235
+Perhaps you used the wrong -p or --strip option?
+The text leading up to this was:
+--------------------------
+|diff --git a/man/help2man b/man/help2man
+|index f9983f7..8bc961c 100755
+|--- a/man/help2man
+|+++ b/man/help2man
+--------------------------
+File to patch:
+Skip this patch? [y]
+Skipping patch.
+9 out of 9 hunks ignored
+patching file ms/config.bat
+patching file ms/config.site
+Hunk #1 succeeded at 73 with fuzz 1.
+patching file po/en.po
+patching file src/analyze.c
+patching file src/cmp.c
+Hunk #1 succeeded at 36 with fuzz 1.
+Hunk #4 succeeded at 185 (offset -6 lines).
+Hunk #5 succeeded at 231 (offset -6 lines).
+Hunk #6 succeeded at 257 (offset -6 lines).
+Hunk #7 succeeded at 269 (offset -6 lines).
+Hunk #8 succeeded at 364 (offset -6 lines).
+Hunk #9 succeeded at 377 (offset -6 lines).
+patching file src/context.c
+Hunk #1 succeeded at 159 (offset 1 line).
+Hunk #2 succeeded at 289 (offset 1 line).
+Hunk #3 succeeded at 393 with fuzz 2 (offset 1 line).
+Hunk #4 succeeded at 431 (offset 1 line).
+Hunk #5 succeeded at 459 (offset 1 line).
+patching file src/diff.c
+Hunk #1 succeeded at 40 with fuzz 2 (offset -2 lines).
+Hunk #2 succeeded at 57 (offset -2 lines).
+Hunk #3 succeeded at 92 (offset -2 lines).
+Hunk #4 succeeded at 330 (offset -10 lines).
+Hunk #5 succeeded at 505 (offset -10 lines).
+Hunk #6 succeeded at 534 (offset -10 lines).
+Hunk #7 succeeded at 585 (offset -14 lines).
+Hunk #8 succeeded at 744 (offset -14 lines).
+Hunk #9 succeeded at 826 (offset -14 lines).
+Hunk #10 FAILED at 876.
+Hunk #11 FAILED at 906.
+Hunk #12 FAILED at 942.
+Hunk #13 succeeded at 960 with fuzz 2 (offset -29 lines).
+Hunk #14 succeeded at 1159 with fuzz 2 (offset -32 lines).
+3 out of 14 hunks FAILED -- saving rejects to file src/diff.c.rej
+patching file src/diff.h
+Hunk #2 succeeded at 126 with fuzz 2 (offset -13 lines).
+Hunk #3 succeeded at 202 (offset -13 lines).
+patching file src/diff3.c
+Hunk #1 succeeded at 35 (offset 1 line).
+Hunk #2 succeeded at 159 (offset 1 line).
+Hunk #3 succeeded at 316 (offset 1 line).
+Hunk #4 succeeded at 351 (offset 1 line).
+Hunk #5 succeeded at 412 (offset 1 line).
+Hunk #6 FAILED at 433.
+Hunk #7 succeeded at 460 with fuzz 2 (offset -18 lines).
+Hunk #8 succeeded at 1275 (offset -18 lines).
+Hunk #9 succeeded at 1475 (offset -18 lines).
+1 out of 9 hunks FAILED -- saving rejects to file src/diff3.c.rej
+patching file src/dir.c
+Hunk #1 succeeded at 84 (offset -1 lines).
+Hunk #2 succeeded at 125 (offset -1 lines).
+Hunk #3 succeeded at 154 (offset -1 lines).
+Hunk #4 succeeded at 234 (offset -1 lines).
+patching file src/ifdef.c
+patching file src/io.c
+patching file src/sdiff.c
+Hunk #2 succeeded at 92 (offset 1 line).
+Hunk #3 succeeded at 175 (offset 23 lines).
+Hunk #4 succeeded at 230 (offset 17 lines).
+Hunk #5 succeeded at 286 (offset 17 lines).
+Hunk #6 succeeded at 572 (offset 13 lines).
+Hunk #7 succeeded at 747 (offset 41 lines).
+patching file src/side.c
+patching file src/system.h
+Hunk #2 succeeded at 105 (offset 6 lines).
+patching file src/util.c
+Hunk #4 succeeded at 190 with fuzz 2.
+Hunk #8 succeeded at 650 (offset -27 lines).
+patching file tests/help-version
+Hunk #1 succeeded at 75 (offset 1 line).
+Hunk #2 succeeded at 85 (offset 1 line).
+Hunk #3 succeeded at 96 (offset 1 line).
+Hunk #4 succeeded at 108 (offset 1 line).
+Hunk #5 succeeded at 140 (offset 1 line).
+Hunk #6 succeeded at 188 (offset 1 line).
+
+7. command git status
+output:
+On branch diff_utils_3.0
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   NEWS
+        modified:   README
+        modified:   TODO
+        modified:   doc/diagmeet.note
+        modified:   ms/config.bat
+        modified:   ms/config.site
+        modified:   po/en.po
+        modified:   src/analyze.c
+        modified:   src/cmp.c
+        modified:   src/context.c
+        modified:   src/diff.c
+        modified:   src/diff.h
+        modified:   src/diff3.c
+        modified:   src/dir.c
+        modified:   src/ifdef.c
+        modified:   src/io.c
+        modified:   src/sdiff.c
+        modified:   src/side.c
+        modified:   src/system.h
+        modified:   src/util.c
+        modified:   tests/help-version
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        NEWS.orig
+        README-hacking.orig
+        README-hacking.rej
+        README.orig
+        README.rej
+        cfg.mk.orig
+        cfg.mk.rej
+        ms/config.site.orig
+        src/cmp.c.orig
+        src/context.c.orig
+        src/diff.c.orig
+        src/diff.c.rej
+        src/diff.h.orig
+        src/diff3.c.orig
+        src/diff3.c.rej
+        src/dir.c.orig
+        src/sdiff.c.orig
+        src/system.h.orig
+        src/util.c.orig
+        tests/help-version.orig
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+8) Learn to use Emacs functions vc-diff (C-x v =) and vc-revert (C-x v u) with describe-mode (C-h m)
+within the *vc_diff* buffer. Also learn diff-apply-hunk (C-c C-a) and diff-goto-source (C-c C-c)
+functions.
+
+vc-diff: Compare the work files in the current VC fileset with the versions you started from (vc-diff). 
+
+vc-revert:Revert the work file(s) in the current VC fileset to the last revision (vc-revert).
+
+diff-apply-hunk: Apply this hunk to its target file (diff-apply-hunk).
+
+diff-goto-source: Go to source file and line corresponding to this hunk.
+
+9: Revert changes to files other than .c files.
+Modified non .c files.
+	modified:   NEWS
+        modified:   README
+        modified:   TODO
+        modified:   doc/diagmeet.note
+        modified:   ms/config.bat
+        modified:   ms/config.site
+        modified:   po/en.po
+        modified:   src/diff.h
+        modified:   src/system.h
+        modified:   tests/help-version
+For each file, my procedure was 
+1. emacs <FILENAME>
+2. C-x v u (Revert)
+3. When prompted "Discard changes in 1 file? (yes or no), answered yes.
+
+Also, and don't forget this part, undo all the changes to .c files other than changes to character string constants,
+as the character-string changes are the only changes that you want; 
+this may require editing some files by hand.
+
+Modified .c files:
+	modified:   src/analyze.c
+        modified:   src/cmp.c
+        modified:   src/context.c
+        modified:   src/diff.c
+        modified:   src/diff3.c
+        modified:   src/dir.c
+        modified:   src/ifdef.c
+        modified:   src/io.c
+        modified:   src/sdiff.c
+        modified:   src/side.c
+        modified:   src/util.c
+Using C-x v =, I compared the recent and previous versions of the c files to revert any edits not in a character string constant.
+
+10. Examine the src/.c.rej files, and copy rejected patches to respective files.
+Files with a *.rej tag were found as follows:
+
+command: ls src/*.rej
+output: diff3.c.rej and diff.c.rej
+
+From diff3.c.rej, I replaced over the line:  
+	
+with N_("-i                          append 'w' and 'q' commands to ed scripts"),
+From diff.c.rej, I replaced over the lines: 
+	N_("-l  --paginate  Pass the output through `pr' to paginate it."),
+	N_("-D NAME  --ifdef=NAME  Output merged file to show `#ifdef NAME' diffs."),
+	N_("  LTYPE is `old', `new', or `unchanged'.  GTYPE is LTYPE or `changed'."),
+	N_("FILES are `FILE1 FILE2' or `DIR1 DIR2' or `DIR FILE...' or `FILE... DIR'."),
+	N_("If a FILE is `-', read standard input."),
+with
+	N_("-l, --paginate                pass output through 'pr' to paginate it"),
+	N_("-D, --ifdef=NAME                output merged file with '#ifdef NAME' diffs"),
+	N_("  LTYPE is 'old', 'new', or 'unchanged'.  GTYPE is LTYPE or 'changed'."),
+	N_("FILES are 'FILE1 FILE2' or 'DIR1 DIR2' or 'DIR FILE...' or 'FILE... DIR'."),
+	N_("If a FILE is '-', read standard input."),
+
+11. Removed all untracked files from the git repo and ran following command:
+git clean -f, and then git status
+
+12.
+Output: modified:   src/cmp.c
+        modified:   src/diff.c
+        modified:   src/diff3.c
+        modified:   src/dir.c
+        modified:   src/sdiff.c
+        modified:   src/side.c
+        modified:   src/util.c
+perform command to produce quote-3.0-patch.txt file
+git diff > quote-3.0-patch.txt
+
+13. Build the resulting modified version of Diffutils, using the commands described in the file README-hacking
+	$ ./bootstrap
+	$patch -p0 gnulib.patch //this is the patch to fix "gets"
+	$ ./configure
+	$ make
+	$ make check
+Finally, verified with "diff . -" and "diff --help". 
+
+14. Now run a sanity check where we can compare the source code of Diffutils 3.0 to the source code
+of our modified version. Put the former source code into a directory diffutils-3.0 and the latter 
+source code to directory diffutils-3.0-patch and run our implementation of diff with command
+	$D/diff -pru diffutils-3.0 diffutils-3.0-patch >quote-3.0-test.txt 
+where D is src.
+
+First, make a directory named diffutils-3.0-patch that holds my modified source code files.
+commands:
+cd ..
+mkdir diffutils-3.0-patch
+cp -r diffutils/src/*.c diffutils-3.0-patch
+
+Then, create another unmodified directory that holds the cloned diffutils.
+commands:
+git clone https://git.savannah.gnu.org/git/diffutils.git
+git checkout v3.0 -b diff_utils_3.0
+
+And copy those unmodified source files to another directory holding unmodified source files.
+mkdir diffutils_3.0
+cp -r tempdiff/diffutils/src/*.c diff_utils_3.0
+
+Finally, compare the modified and unmodified source files.
+./diffutils/src/diff -pru diffutils-3.0 diffutils-3.0-patch >quote-3.0-test.txt
+
+The differences in output were very minor with only changes from ` to '.

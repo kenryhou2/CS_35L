@@ -1,0 +1,91 @@
+HW3 Python
+Henry Kou
+204921239
+
+Q3: What happens when this script is invoked on an empty file like /dev/null, and why?
+
+Traceback (most recent call last):
+  File "./randline.py", line 70, in <module>
+    main()
+  File "./randline.py", line 64, in main
+    sys.stdout.write(generator.chooseline())
+  File "./randline.py", line 34, in chooseline
+    return random.choice(self.lines)
+  File "/usr/lib64/python2.7/random.py", line 274, in choice
+    return seq[int(self.random() * len(seq))]  # raises IndexError if seq is empty
+IndexError: list index out of range
+
+
+Q4:What happens when this script is invoked with Python 3 rather than Python 2, and why? 
+(You can run Python 3 on the SEASnet hosts by using the command python3 instead of python.)
+
+Error when running python2 as python 3 for randline, converted in shuf.py
+File "randline.py", line 65
+    except IOError as (errno, strerror):
+                      ^
+SyntaxError: invalid syntax
+6
+
+This line is incorrect syntax:
+
+except IOError as (errno, strerror):
+The correct form is:
+
+except IOError as err:
+
+
+Q5: Diff between python2 and python 3?
+There were several differences between python2 and python3 including printing, and error handling
+Python2 is being phased out by 2020, and therefore a lot of its modules are being classed as deprecated.
+Python3 has these new changes because it includes more functionality. For example Python2 is not 
+a traditionally typed language but python 3.5 supports typing which removes development conflicts when using new code.
+
+Test Cases:
+shuf -n -1 lab3.txt
+./shuf.py -n -1 lab3.txt #2> shuf.py: error: invalid NUMLINES -1
+shuf -n x lab3.txt
+./shuf.py -n x lab3.txt #error:shuf.py: error: invalid NUMLINES x
+shuf -n 3.5 lab3.txt
+./shuf.py -n 3.5 lab3.txt #error shuf.py: error: invalid NUMLINES 3.5
+shuf lab3.txt 
+./shuf.py lab3.txt
+shuf -i 4-5 lab3.txt
+./shuf.py -i 4-5 lab3.txt #error: Wrong number of operands
+shuf -i 4-5
+./shuf.py -i 4-5
+shuf -i 5-5
+./shuf.py -i 5-5
+shuf -i l-m
+./shuf.py -i l-m #error: invalid input
+shuf -i 5.5-8
+./shuf.py -i 5.5-8 #error: invalid input range
+shuf -i 5-8.5
+./shuf.py -i 5-8.5 #error: invalid input range
+shuf -i -
+./shuf.py -i - #error: invalid input range
+shuf -i -5
+./shuf.py -i -5 #error: invalid input range
+shuf -i 5-
+./shuf.py -i 5- #error: invalid input range
+shuf -i 5--5
+./shuf.py -i 5--5 #error: invalid input input
+shuf -i -5-5
+./shuf.py -i -5-5 #error: invalid input range
+shuf -i 7-6
+./shuf.py -i 7-6 #nothing happens
+shuf fakeFile.txt
+./shuf.py fakeFile.txt #error: no file exits
+shuf lab3
+./shuf.py lab3 #error: is a directory
+shuf newfile
+./shuf.py newfile
+shuf -i 5-10
+./shuf.py -i 5-10
+shuf -n 2 -r -i 5-10
+./shuf.py -n 2 -r -i 5-10
+shuf -n 7 newfile
+./shuf.py -n 7 newfile
+shuf -n 2 newfile
+./shuf.py -n 2 newfile
+shuf empty_file
+./shuf.py empty_file
